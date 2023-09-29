@@ -42,10 +42,11 @@ const MovieDetail = ({ movie, reviews }) => {
     genres,
   } = movie;
 
-  const { reviewId, author_details, content, created_at } = reviews;
   const [userRating, setUserRating] = useState(0);
   const [overallRating, setOverallRating] = useState(() => {
-    const storedOverallRating = localStorage.getItem(`overallRating_${movie.id}`);
+    const storedOverallRating = localStorage.getItem(
+      `overallRating_${movie.id}`
+    );
     return parseFloat(storedOverallRating) || 0;
   });
 
@@ -64,17 +65,20 @@ const MovieDetail = ({ movie, reviews }) => {
         variables: {
           addMovieRatingsId: movie.id,
           rating: userRating,
-        }
+        },
       });
       console.log("response => ", response);
       console.log("rating added");
 
       setOverallRating(response.data.addMovieRatings.rating);
-      localStorage.setItem(`overallRating_${movie.id}`, response.data.addMovieRatings.rating.toString());
-    } catch(error) {
+      localStorage.setItem(
+        `overallRating_${movie.id}`,
+        response.data.addMovieRatings.rating.toString()
+      );
+    } catch (error) {
       console.log("Error adding rating", error);
     }
-  }
+  };
 
   const modalRating = (
     <Center>
@@ -201,16 +205,32 @@ const MovieDetail = ({ movie, reviews }) => {
           </CardBody>
         </Card>
         <VStack mt={10}>
-          <Card mt={5} colorScheme={"gray"} boxShadow={'2xl'}>
+          <Card mt={5} colorScheme={"gray"} boxShadow={"2xl"}>
             <CardBody px={20}>{modalRating}</CardBody>
           </Card>
         </VStack>
       </Box>
 
       <Box mx={[20, 50, 50]} mb={[10, 20, 50]}>
-        <Grid templateColumns={["repeat(1, 1fr)"]} gap={10} m={[5, 10, 10, 20]}>
+        <VStack spacing={0} align={"center"}>
+          <Heading bgGradient="linear(to-r, #ff0000, #f7ff5c)" bgClip="text">
+            Movie Reviews
+          </Heading>
+          <Text fontSize={["xl"]} fontWeight="bold" my={5}>
+            Look at what our reviewers said
+          </Text>
+        </VStack>
+        {reviews.length > 0 ? (
           <ReviewCard reviews={reviews} />
-        </Grid>
+        ) : (
+          <Center>
+            <Tag px={10}>
+              <Text fontSize={["lg"]} fontWeight="bold" my={5}>
+                No reviews yet
+              </Text>
+            </Tag>
+          </Center>
+        )}
       </Box>
     </>
   );
