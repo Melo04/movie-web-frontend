@@ -11,13 +11,14 @@ import {
   Button,
   Box,
   Center,
-  Grid,
   Container,
+  Icon,
 } from "@chakra-ui/react";
 import { ArrowLeftIcon, StarIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 import ReviewCard from "./ReviewCard";
 import { gql, useMutation } from "@apollo/client";
+import { AiFillHeart } from "react-icons/ai";
 
 export const ADD_RATINGS = gql`
   mutation Mutation($addMovieRatingsId: ID!, $rating: Float!) {
@@ -25,6 +26,17 @@ export const ADD_RATINGS = gql`
       code
       message
       rating
+      success
+    }
+  }
+`;
+
+export const ADD_FAVOURITES = gql`
+  mutation Mutation($addToFavouritesId: ID!, $favorite: Boolean!) {
+    addToFavourites(id: $addToFavouritesId, favorite: $favorite) {
+      code
+      message
+      favorite
       success
     }
   }
@@ -43,6 +55,8 @@ const MovieDetail = ({ movie, reviews }) => {
   } = movie;
 
   const [userRating, setUserRating] = useState(0);
+  const [favourite, setFavourite] = useState(false);
+
   const [overallRating, setOverallRating] = useState(() => {
     const storedOverallRating = localStorage.getItem(
       `overallRating_${movie.id}`
@@ -58,6 +72,7 @@ const MovieDetail = ({ movie, reviews }) => {
   const posterUrl = `https://image.tmdb.org/t/p/original/${poster_path}`;
 
   const [addMovieRatings] = useMutation(ADD_RATINGS);
+  const [addToFavourites] = useMutation(ADD_FAVOURITES);
 
   const handleSubmitRating = async () => {
     try {
@@ -67,7 +82,6 @@ const MovieDetail = ({ movie, reviews }) => {
           rating: userRating,
         },
       });
-      console.log("response => ", response);
       console.log("rating added");
 
       setOverallRating(response.data.addMovieRatings.rating);
@@ -77,6 +91,20 @@ const MovieDetail = ({ movie, reviews }) => {
       );
     } catch (error) {
       console.log("Error adding rating", error);
+    }
+  };
+
+  const handleSubmitFavourite = async () => {
+    try {
+      await addToFavourites({
+        variables: {
+          addToFavouritesId: movie.id,
+          favorite: favourite,
+        },
+      });
+      console.log("favourite added");
+    } catch (error) {
+      console.log("Error adding favourite", error);
     }
   };
 
@@ -160,6 +188,18 @@ const MovieDetail = ({ movie, reviews }) => {
               );
             })}
           </HStack>
+          <Button
+            my={5}
+            bg="white"
+            color="red"
+            variant="solid"
+            boxShadow={"2xl"}
+            _hover={{ bg: "red", color: "white" }}
+            onClick={handleSubmitFavourite}
+          >
+            <Icon as={AiFillHeart} mr={2} />
+            Add to Favourites
+          </Button>
           <Card p={3} my={5} boxShadow={"2xl"}>
             <CardBody>
               <Heading fontSize="md" mb={2}>

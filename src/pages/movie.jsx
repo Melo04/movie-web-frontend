@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import QueryResult from "../organisms/query-result";
 import MovieDetail from "../organisms/MovieDetail";
 
-//get movie
 export const GET_MOVIE = gql`
   query Movie($movieId: ID!) {
     movie(id: $movieId) {

@@ -13,11 +13,31 @@ import {
   ModalHeader,
   ModalCloseButton,
   Text,
+  Grid,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useQuery, gql } from "@apollo/client";
+import QueryResult from "../organisms/query-result";
+import MovieCard from "../containers/movie-card";
+
+export const GET_FAVOURITES = gql`
+  query Favourites($favouritesId: ID!) {
+    favourites(id: $favouritesId) {
+      backdrop_path
+      genre_ids
+      id
+      overview
+      popularity
+      poster_path
+      release_date
+      title
+      vote_average
+    }
+  }
+`;
 
 const getProfile = async () => {
   const token = localStorage.getItem("token");
@@ -50,7 +70,7 @@ const Profile = () => {
     firstName: "",
     lastName: "",
   });
-  const [error, setError] = useState([]);
+  const [errors, setErrors] = useState([]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -80,16 +100,16 @@ const Profile = () => {
         firstName: "",
         lastName: "",
       });
-      setError([]);
+      setErrors([]);
       toast.success("Edit Profile successfully!", {
         position: toast.POSITION.TOP_RIGHT,
       });
       onClose();
     } catch (error) {
       if (error.response && error.response.data) {
-        setError(error.response.data.message);
+        setErrors(error.response.data.message);
       } else {
-        setError("Something went wrong!");
+        setErrors("Something went wrong!");
       }
     }
   };
@@ -101,6 +121,14 @@ const Profile = () => {
     };
     fetchUserProfile();
   }, []);
+
+  const {
+    loading: queryLoading,
+    error,
+    data,
+  } = useQuery(GET_FAVOURITES, {
+    variables: { favouritesId: userProfile?.id },
+  }); 
 
   return (
     <>
@@ -116,10 +144,7 @@ const Profile = () => {
               </Stack>
               <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
-                <ModalContent
-                  align={"center"}
-                  justify={"center"}
-                >
+                <ModalContent align={"center"} justify={"center"}>
                   <ModalCloseButton />
                   <Stack
                     spacing={4}
@@ -147,7 +172,7 @@ const Profile = () => {
                         onChange={handleChange}
                       />
                     </FormControl>
-                    {error.includes("Invalid email") && (
+                    {errors.includes("Invalid email") && (
                       <Text color="red.500" fontWeight={500} fontSize="md">
                         Invalid email address
                       </Text>
@@ -163,7 +188,7 @@ const Profile = () => {
                         onChange={handleChange}
                       />
                     </FormControl>
-                    {error.includes("firstName must be a string") && (
+                    {errors.includes("firstName must be a string") && (
                       <Text color="red.500" fontWeight={500} fontSize="md">
                         First name must be a string
                       </Text>
@@ -179,7 +204,7 @@ const Profile = () => {
                         onChange={handleChange}
                       />
                     </FormControl>
-                    {error.includes("lastName must be a string") && (
+                    {errors.includes("lastName must be a string") && (
                       <Text color="red.500" fontWeight={500} fontSize="md">
                         First name must be a string
                       </Text>
@@ -232,6 +257,22 @@ const Profile = () => {
           <Button onClick={onOpen}>Edit User</Button>
         </Stack>
       </Center>
+        <Grid
+          templateColumns={[
+            "repeat(1, 1fr)",
+            "repeat(2, 1fr)",
+            "repeat(3, 1fr)",
+            "repeat(4, 1fr)",
+          ]}
+          gap={10}
+          m={[5, 10, 10, 20]}
+        >
+          <QueryResult error={error} loading={queryLoading} data={data}>
+            {data?.favourites?.map((favorite) => (
+              <MovieCard key={favorite.id} movie={favorite} />
+            ))}
+          </QueryResult>
+        </Grid>
     </>
   );
 };
