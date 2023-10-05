@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Movies from "./movies";
 import Movie from "./movie";
 import Tvseries from "./tvseries";
 import Series from "./series";
-import Lottie from "lottie-react";
-import heroData from "../assets/hero.json";
-import { Center, Container, Text } from "@chakra-ui/react";
-import Typewriter from "typewriter-effect";
 import PopularMovies from "./popularmovies";
 import Signup from "./signup";
 import Login from "./login";
