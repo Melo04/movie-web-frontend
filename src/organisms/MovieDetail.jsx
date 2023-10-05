@@ -19,6 +19,8 @@ import { Link } from "react-router-dom";
 import ReviewCard from "./ReviewCard";
 import { gql, useMutation } from "@apollo/client";
 import { AiFillHeart } from "react-icons/ai";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const ADD_RATINGS = gql`
   mutation Mutation($addMovieRatingsId: ID!, $rating: Float!) {
@@ -32,11 +34,10 @@ export const ADD_RATINGS = gql`
 `;
 
 export const ADD_FAVOURITES = gql`
-  mutation Mutation($addToFavouritesId: ID!, $favorite: Boolean!) {
-    addToFavourites(id: $addToFavouritesId, favorite: $favorite) {
+  mutation Mutation($addToFavouritesId: ID!) {
+    addToFavourites(id: $addToFavouritesId) {
       code
       message
-      favorite
       success
     }
   }
@@ -55,7 +56,6 @@ const MovieDetail = ({ movie, reviews }) => {
   } = movie;
 
   const [userRating, setUserRating] = useState(0);
-  const [favourite, setFavourite] = useState(false);
 
   const [overallRating, setOverallRating] = useState(() => {
     const storedOverallRating = localStorage.getItem(
@@ -95,16 +95,28 @@ const MovieDetail = ({ movie, reviews }) => {
   };
 
   const handleSubmitFavourite = async () => {
-    try {
-      await addToFavourites({
-        variables: {
-          addToFavouritesId: movie.id,
-          favorite: favourite,
-        },
+    const token = localStorage.getItem("token");
+    console.log("token from favourites added => ", token);
+
+    if (token) {
+      try {
+        await addToFavourites({
+          variables: {
+            addToFavouritesId: movie.id,
+          },
+        });
+        console.log("favourite added");
+
+        toast.success("Favourite added successfully!", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      } catch (error) {
+        console.log("Error adding favourite", error);
+      }
+    } else {
+      toast.error("Please sign in!", {
+        position: toast.POSITION.TOP_RIGHT,
       });
-      console.log("favourite added");
-    } catch (error) {
-      console.log("Error adding favourite", error);
     }
   };
 
@@ -210,6 +222,19 @@ const MovieDetail = ({ movie, reviews }) => {
           </Card>
         </VStack>
       </Container>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
 
       <Box mx={[20, 50, 100]} mb={[10, 20, 50]}>
         <Card boxShadow={"2xl"}>

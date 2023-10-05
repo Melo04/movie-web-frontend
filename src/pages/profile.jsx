@@ -24,8 +24,8 @@ import QueryResult from "../organisms/query-result";
 import MovieCard from "../containers/movie-card";
 
 export const GET_FAVOURITES = gql`
-  query Favourites($favouritesId: ID!) {
-    favourites(id: $favouritesId) {
+  query Favourites {
+    favourites {
       backdrop_path
       genre_ids
       id
@@ -41,6 +41,7 @@ export const GET_FAVOURITES = gql`
 
 const getProfile = async () => {
   const token = localStorage.getItem("token");
+  console.log("token from profile page => ", token)
   if (!token) {
     return (
       <Center>
@@ -87,7 +88,6 @@ const Profile = () => {
     }
 
     e.preventDefault();
-
     try {
       await axios.patch("http://localhost:4000/users", formData, {
         headers: {
@@ -122,13 +122,7 @@ const Profile = () => {
     fetchUserProfile();
   }, []);
 
-  const {
-    loading: queryLoading,
-    error,
-    data,
-  } = useQuery(GET_FAVOURITES, {
-    variables: { favouritesId: userProfile?.id },
-  }); 
+  const { loading: queryLoading, error, data } = useQuery(GET_FAVOURITES);
 
   return (
     <>
@@ -257,22 +251,22 @@ const Profile = () => {
           <Button onClick={onOpen}>Edit User</Button>
         </Stack>
       </Center>
-        <Grid
-          templateColumns={[
-            "repeat(1, 1fr)",
-            "repeat(2, 1fr)",
-            "repeat(3, 1fr)",
-            "repeat(4, 1fr)",
-          ]}
-          gap={10}
-          m={[5, 10, 10, 20]}
-        >
-          <QueryResult error={error} loading={queryLoading} data={data}>
-            {data?.favourites?.map((favorite) => (
-              <MovieCard key={favorite.id} movie={favorite} />
-            ))}
-          </QueryResult>
-        </Grid>
+      <Grid
+        templateColumns={[
+          "repeat(1, 1fr)",
+          "repeat(2, 1fr)",
+          "repeat(3, 1fr)",
+          "repeat(4, 1fr)",
+        ]}
+        gap={10}
+        m={[5, 10, 10, 20]}
+      >
+        <QueryResult error={error} loading={queryLoading} data={data}>
+          {data?.favourites?.map((favorite) => (
+            <MovieCard key={favorite.id} movie={favorite} />
+          ))}
+        </QueryResult>
+      </Grid>
     </>
   );
 };

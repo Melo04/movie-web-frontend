@@ -27,7 +27,9 @@ const paths = ["/", "/tv-series", "/popular-movies"];
 const NavLink = ({ children, path }) => {
   return (
     <Link to={path}>
-      <Button variant='ghost' colorScheme='blue'>{children}</Button>
+      <Button variant="ghost" colorScheme="blue">
+        {children}
+      </Button>
     </Link>
   );
 };
@@ -35,6 +37,8 @@ const NavLink = ({ children, path }) => {
 export default function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
+  const token = localStorage.getItem("token");
+  console.log("token from header => ", token);
 
   return (
     <>
@@ -78,34 +82,35 @@ export default function Header() {
               {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             </Button>
             <Menu>
-              <Link to='/login'>
-                <Button
-                  mr={4}
-                  color="white"
-                  fontWeight="bold"
-                  borderRadius="md"
-                  bgGradient="linear(to-r, blue.400, green.400)"
-                  _hover={{
-                    bgGradient: "linear(to-r, red.500, orange.500, yellow.500)",
-                  }}
-                >
-                  Sign In
-                </Button>
-              </Link>
-              {/* <MenuButton
-                as={Button}
-                rounded={"full"}
-                variant={"link"}
-                cursor={"pointer"}
-                minW={0}
-              >
-                <Avatar
-                  size={"sm"}
-                  src={
-                    "https://images.unsplash.com/photo-1493666438817-866a91353ca9?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&s=b616b2c5b373a80ffc9636ba24f7a4a9"
-                  }
-                />
-              </MenuButton> */}
+              {token ? (
+                <Link to="/profile">
+                  <MenuButton
+                    as={Button}
+                    rounded={"full"}
+                    variant={"link"}
+                    cursor={"pointer"}
+                    minW={0}
+                  >
+                    <Avatar size={"sm"} />
+                  </MenuButton>
+                </Link>
+              ) : (
+                <Link to="/login">
+                  <Button
+                    mr={4}
+                    color="white"
+                    fontWeight="bold"
+                    borderRadius="md"
+                    bgGradient="linear(to-r, blue.400, green.400)"
+                    _hover={{
+                      bgGradient:
+                        "linear(to-r, red.500, orange.500, yellow.500)",
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </Menu>
           </Flex>
         </Flex>
