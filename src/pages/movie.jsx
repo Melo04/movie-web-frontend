@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { useParams } from "react-router-dom";
 import QueryResult from "../organisms/query-result";
 import MovieDetail from "../organisms/MovieDetail";
+import { Center } from "@chakra-ui/react";
+import Lottie from "lottie-react";
+import loadingData from "../assets/loading.json";
 
 export const GET_MOVIE = gql`
   query Movie($movieId: ID!) {
@@ -46,6 +49,7 @@ export const GET_REVIEWS = gql`
 
 const Movie = () => {
   const { id } = useParams();
+  const [loading, setLoading] = useState(true);
   const {
     loading: movieLoading,
     error: movieError,
@@ -62,17 +66,36 @@ const Movie = () => {
     variables: { reviewsId: id },
   });
 
-  const loading = movieLoading || reviewsLoading;
+  const queryLoading = movieLoading || reviewsLoading;
   const error = movieError || reviewsError;
 
+  useEffect(() => {
+    if(!queryLoading) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+    }
+  }, [queryLoading]);
+
   return (
-    <QueryResult
-      error={error}
-      loading={loading}
-      data={{ movie: movieData?.movie, reviews: reviewsData?.reviews }}
-    >
-      <MovieDetail movie={movieData?.movie} reviews={reviewsData?.reviews} />
-    </QueryResult>
+    <>
+      {loading ? (
+        <Center>
+          <Lottie animationData={loadingData} />
+        </Center>
+      ) : (
+        <QueryResult
+          error={error}
+          loading={loading}
+          data={{ movie: movieData?.movie, reviews: reviewsData?.reviews }}
+        >
+          <MovieDetail
+            movie={movieData?.movie}
+            reviews={reviewsData?.reviews}
+          />
+        </QueryResult>
+      )}
+    </>
   );
 };
 

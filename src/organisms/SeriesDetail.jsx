@@ -212,35 +212,36 @@ const SeriesDetail = ({ series }) => {
 
       <Box mx={[20, 50, 50]} mb={[10, 20, 50]}>
         <Center>
-          <Heading pb={5} fontSize="md">
+          <Heading pb={5} fontSize="2xl" mb={5}>
             Seasons:
           </Heading>
         </Center>
         <Grid
           templateColumns={[
             "repeat(1, 1fr)",
+            "repeat(1, 1fr)",
             "repeat(2, 1fr)",
             "repeat(3, 1fr)",
           ]}
           gap={10}
-          m={[5, 10, 10, 20]}
+          mx={[5, 10, 10, 20]}
         >
           {seasons?.map((ep) => (
             <Card boxShadow={"2xl"} key={ep.id}>
               <VStack my={5} mx={10}>
-                <Text fontSize={["lg"]} mb={2}>
+                <Text fontSize="xl" fontWeight="bold" mb={2}>
                   {ep.name}
                 </Text>
                 {ep.poster_path && (
                   <Image
                     width="auto"
-                    height="200px"
+                    height="300px"
                     borderRadius="md"
                     src={`https://image.tmdb.org/t/p/original/${ep.poster_path}`}
                     alt={`${ep.name}`}
                   />
                 )}
-                <Text mt={5} fontSize={["sm"]}>
+                <Text mt={5} fontSize={["sm", "md"]}>
                   {ep.overview}
                 </Text>
               </VStack>

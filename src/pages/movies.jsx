@@ -8,11 +8,25 @@ import {
   Button,
   HStack,
   IconButton,
+  InputGroup,
+  Input,
+  InputRightElement,
+  VStack,
+  Text,
+  MenuButton,
+  Menu,
+  MenuList,
+  Checkbox,
 } from "@chakra-ui/react";
 import QueryResult from "../organisms/query-result";
 import Lottie from "lottie-react";
 import loadingData from "../assets/loading.json";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  SearchIcon,
+} from "@chakra-ui/icons";
 
 export const MOVIES = gql`
   query Movies($page: Int) {
@@ -24,6 +38,16 @@ export const MOVIES = gql`
       release_date
       title
       vote_average
+      genre_ids
+    }
+  }
+`;
+
+export const GENRES = gql`
+  query Moviegenres {
+    moviegenres {
+      id
+      name
     }
   }
 `;
@@ -40,6 +64,20 @@ const Movies = () => {
     variables: { page: currentPage },
   });
 
+  const { data: genreData } = useQuery(GENRES);
+
+  const [selectedGenres, setSelectedGenres] = useState([]);
+
+  const getFilteredMovies = () => {
+    if(selectedGenres.length === 0) return data?.movies;
+    const selectedGenresIds = selectedGenres.map((genre) => parseInt(genre.id));
+    console.log(selectedGenresIds);
+    return data?.movies?.filter((movie) => {
+      const movieGenreIds = movie.genre_ids.map((id) => id);
+      return movieGenreIds.some((id) => selectedGenresIds.includes(id));;
+    });
+  }
+ 
   const prevPage = () => {
     if (!queryLoading && currentPage > 1) {
       setCurrentPage((prevPage) => prevPage - 1);
@@ -54,26 +92,30 @@ const Movies = () => {
 
   const totalPages = 20;
   const visiblePages = 5;
-  const pagesArray = Array.from({length: 20}, (_, i) => i + 1);
+  const pagesArray = Array.from({ length: 20 }, (_, i) => i + 1);
 
   const getPageButtons = () => {
-    if(totalPages <= visiblePages) return pagesArray;
+    if (totalPages <= visiblePages) return pagesArray;
 
     const firstPage = 1;
     const lastPage = totalPages;
     const middlePage = Math.floor(visiblePages / 2);
 
-    if(currentPage <= middlePage) {
+    if (currentPage <= middlePage) {
       return [...pagesArray.slice(0, visiblePages - 1), "...", lastPage];
-    }else if(currentPage >= lastPage - middlePage) {
-      return [firstPage, "...", ...pagesArray.slice(totalPages - visiblePages + 1)];
+    } else if (currentPage >= lastPage - middlePage) {
+      return [
+        firstPage,
+        "...",
+        ...pagesArray.slice(totalPages - visiblePages + 1),
+      ];
     } else {
       return [
         firstPage,
         "...",
         ...pagesArray.slice(currentPage - middlePage, currentPage + middlePage),
         "...",
-        lastPage
+        lastPage,
       ];
     }
   };
@@ -89,6 +131,8 @@ const Movies = () => {
     }
   }, [currentPage, queryLoading, fetchMore]);
 
+  // console.log(data?.movies?.map((movie) => movie.genre_ids));
+
   return (
     <>
       <Center>
@@ -100,6 +144,58 @@ const Movies = () => {
         </Center>
       ) : (
         <>
+          <Center>
+            <VStack>
+              <InputGroup w="400px" borderColor="blue.300" mt={10}>
+                <Input
+                  color="blue.300"
+                  placeholder="Search for a movie..."
+                  _placeholder={{ color: "inherit" }}
+                />
+                <InputRightElement>
+                  <SearchIcon color="blue.300" />
+                </InputRightElement>
+              </InputGroup>
+              <HStack spacing={5} mt={5}>
+                <Text fontSize="lg">Filter By</Text>
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    rightIcon={<ChevronDownIcon />}
+                    colorScheme="blue"
+                  >
+                    Genres
+                  </MenuButton>
+                  <MenuList py={5} px={5}>
+                    {genreData?.moviegenres?.map((genre) => (
+                      <VStack key={genre.id} align="left" spacing={1}>
+                        <Checkbox
+                          colorScheme="blue"
+                          value={genre.id}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedGenres((prev) => [
+                                ...prev,
+                                {
+                                  id: genre.id,
+                                },
+                              ]);
+                            } else {
+                              setSelectedGenres((prev) =>
+                                prev.filter((g) => g.id !== genre.id)
+                              );
+                            }
+                          }}
+                        >
+                          {genre.name}
+                        </Checkbox>
+                      </VStack>
+                    ))}
+                  </MenuList>
+                </Menu>
+              </HStack>
+            </VStack>
+          </Center>
           <Grid
             templateColumns={[
               "repeat(1, 1fr)",
@@ -111,11 +207,13 @@ const Movies = () => {
             m={[5, 10, 10, 20]}
           >
             <QueryResult error={error} loading={loading} data={data}>
-              {data?.movies?.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
+              {/* {data?.movies?.map((movie) => (
+                <MovieCard key={movie.id} movie={movie}/>
+              ))} */}
+              {getFilteredMovies()?.map((movie) => (
+                <MovieCard key={movie.id} movie={movie}/>
               ))}
             </QueryResult>
-            {/* pagination */}
           </Grid>
           <HStack spacing={5} mt={10} mb={10} justify="center">
             <IconButton

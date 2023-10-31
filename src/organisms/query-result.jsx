@@ -14,7 +14,11 @@ const QueryResult = ({ loading, error, data, children }) => {
     );
   }
   if (!data) {
-    return <p>Nothing to show...</p>;
+    return (
+      <Spinner>
+        <LoadingSpinner data-testid="spinner" size="large" theme="grayscale" />
+      </Spinner>
+    );
   }
   if (data) {
     return children;
