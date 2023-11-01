@@ -53,12 +53,14 @@ export default function Header() {
           />
           <HStack spacing={8} alignItems={"center"}>
             <Box>
-              <HStack>
-                <Image src={logo} boxSize={10} alt="logo" />
-                <Text fontSize="lg" fontWeight="bold" color="#0011ff">
-                  Cinema
-                </Text>
-              </HStack>
+              <Link to="/">
+                <HStack>
+                  <Image src={logo} boxSize={10} alt="logo" />
+                  <Text fontSize="lg" fontWeight="bold" color="#0011ff">
+                    Cinema
+                  </Text>
+                </HStack>
+              </Link>
             </Box>
             <HStack
               as={"nav"}

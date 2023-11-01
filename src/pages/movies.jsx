@@ -21,6 +21,7 @@ import {
 import QueryResult from "../organisms/query-result";
 import Lottie from "lottie-react";
 import loadingData from "../assets/loading.json";
+import notfoundData from "../assets/notfound.json";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -52,32 +53,78 @@ export const GENRES = gql`
   }
 `;
 
+export const SEARCHMOVIES = gql`
+  query SearchMovies($keyword: String!) {
+    searchMovies(keyword: $keyword) {
+      genre_ids
+      genres {
+        id
+      }
+      id
+      overview
+      popularity
+      poster_path
+      production_companies {
+        id
+      }
+      release_date
+      title
+      vote_average
+    }
+  }
+`;
+
 const Movies = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const {
     loading: queryLoading,
     error,
-    data,
+    data: movieData,
     fetchMore,
   } = useQuery(MOVIES, {
     variables: { page: currentPage },
   });
 
-  const { data: genreData } = useQuery(GENRES);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const { loading: searchLoading, data: searchData } = useQuery(SEARCHMOVIES, {
+    variables: { keyword: searchKeyword },
+  });
 
+  const { data: genreData } = useQuery(GENRES);
   const [selectedGenres, setSelectedGenres] = useState([]);
 
   const getFilteredMovies = () => {
-    if(selectedGenres.length === 0) return data?.movies;
+    if (selectedGenres.length === 0) {
+      console.log(searchData?.searchMovies);
+      return searchKeyword === ""
+        ? movieData?.movies
+        : searchData?.searchMovies;
+    }
+    if (
+      searchData?.searchMovies === undefined ||
+      searchData?.searchMovies.length === 0 ||
+      error
+    ) {
+      console.log("not found");
+      return (
+        <Center>
+          <Lottie animationData={notfoundData} />
+        </Center>
+      );
+    }
     const selectedGenresIds = selectedGenres.map((genre) => parseInt(genre.id));
-    console.log(selectedGenresIds);
-    return data?.movies?.filter((movie) => {
-      const movieGenreIds = movie.genre_ids.map((id) => id);
-      return movieGenreIds.some((id) => selectedGenresIds.includes(id));;
-    });
-  }
- 
+    return searchKeyword === ""
+      ? movieData?.movies?.filter((movie) => {
+          const movieGenreIds = movie.genre_ids.map((id) => id);
+          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+        })
+      : searchData?.searchMovies?.filter((movie) => {
+          const movieGenreIds = movie.genre_ids.map((id) => id);
+          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+        });
+  };
+
   const prevPage = () => {
     if (!queryLoading && currentPage > 1) {
       setCurrentPage((prevPage) => prevPage - 1);
@@ -121,7 +168,7 @@ const Movies = () => {
   };
 
   useEffect(() => {
-    if (!queryLoading) {
+    if (!queryLoading || !searchLoading) {
       setTimeout(() => {
         setLoading(false);
       }, 2000);
@@ -129,9 +176,7 @@ const Movies = () => {
         variables: { page: currentPage },
       });
     }
-  }, [currentPage, queryLoading, fetchMore]);
-
-  // console.log(data?.movies?.map((movie) => movie.genre_ids));
+  }, [currentPage, queryLoading, fetchMore, searchLoading, searchKeyword]);
 
   return (
     <>
@@ -151,6 +196,9 @@ const Movies = () => {
                   color="blue.300"
                   placeholder="Search for a movie..."
                   _placeholder={{ color: "inherit" }}
+                  onChange={(e) => {
+                    setSearchKeyword(e.target.value);
+                  }}
                 />
                 <InputRightElement>
                   <SearchIcon color="blue.300" />
@@ -196,25 +244,29 @@ const Movies = () => {
               </HStack>
             </VStack>
           </Center>
-          <Grid
-            templateColumns={[
-              "repeat(1, 1fr)",
-              "repeat(2, 1fr)",
-              "repeat(3, 1fr)",
-              "repeat(4, 1fr)",
-            ]}
-            gap={10}
-            m={[5, 10, 10, 20]}
-          >
-            <QueryResult error={error} loading={loading} data={data}>
-              {/* {data?.movies?.map((movie) => (
-                <MovieCard key={movie.id} movie={movie}/>
-              ))} */}
-              {getFilteredMovies()?.map((movie) => (
-                <MovieCard key={movie.id} movie={movie}/>
-              ))}
-            </QueryResult>
-          </Grid>
+          {getFilteredMovies()?.length === 0 ? (
+            <VStack my={20}>
+              <Heading color="blue.500">Movie Not Found</Heading>
+              <Lottie animationData={notfoundData} />
+            </VStack>
+          ) : (
+            <Grid
+              templateColumns={[
+                "repeat(1, 1fr)",
+                "repeat(2, 1fr)",
+                "repeat(3, 1fr)",
+                "repeat(4, 1fr)",
+              ]}
+              gap={10}
+              m={[5, 10, 10, 20]}
+            >
+              <QueryResult error={error} loading={loading} data={movieData}>
+                {getFilteredMovies()?.map((movie) => (
+                  <MovieCard key={movie.id} movie={movie} />
+                ))}
+              </QueryResult>
+            </Grid>
+          )}
           <HStack spacing={5} mt={10} mb={10} justify="center">
             <IconButton
               aria-label="previous"
