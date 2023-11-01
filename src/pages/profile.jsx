@@ -22,6 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useQuery, gql } from "@apollo/client";
 import QueryResult from "../organisms/query-result";
 import MovieCard from "../containers/movie-card";
+import Footer from "../organisms/Footer";
 
 export const GET_FAVOURITES = gql`
   query Favourites {
@@ -267,6 +268,7 @@ const Profile = () => {
           ))}
         </QueryResult>
       </Grid>
+      <Footer/>
     </>
   );
 };

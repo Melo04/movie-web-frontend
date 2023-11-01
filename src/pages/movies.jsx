@@ -28,6 +28,7 @@ import {
   ChevronRightIcon,
   SearchIcon,
 } from "@chakra-ui/icons";
+import Footer from "../organisms/Footer";
 
 export const MOVIES = gql`
   query Movies($page: Int) {
@@ -291,6 +292,7 @@ const Movies = () => {
           )}
         </>
       )}
+      <Footer/>
     </>
   );
 };

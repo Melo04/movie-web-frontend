@@ -1,5 +1,8 @@
 # __Movie Website__
 
-This is a full stack movie website built with React as frontend, NestJS and GraphQL as backend. The api is obtained from [TMDB](https://www.themoviedb.org/)
+A full stack movie web app built with ReactJS as frontend, NestJS, GraphQL and Prisma as backend. The api is obtained from [TMDB Movie API](https://www.themoviedb.org/)
 
-## __Screenshots__
+
+## __Website Link__
+
+[https://movie-web-frontend-seven.vercel.app/](https://movie-web-frontend-seven.vercel.app/)

@@ -28,6 +28,7 @@ import {
   ChevronDownIcon,
   SearchIcon,
 } from "@chakra-ui/icons";
+import Footer from "../organisms/Footer";
 
 export const TVSERIES = gql`
   query Tvseries($page: Int) {
@@ -309,6 +310,7 @@ const Tvseries = () => {
           )}
         </>
       )}
+      <Footer/>
     </>
   );
 };

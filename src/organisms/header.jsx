@@ -57,7 +57,7 @@ export default function Header() {
                 <HStack>
                   <Image src={logo} boxSize={10} alt="logo" />
                   <Text fontSize="lg" fontWeight="bold" color="#0011ff">
-                    Cinema
+                    MOVIES
                   </Text>
                 </HStack>
               </Link>

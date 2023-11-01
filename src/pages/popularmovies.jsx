@@ -28,6 +28,7 @@ import {
   SearchIcon,
   ChevronDownIcon,
 } from "@chakra-ui/icons";
+import Footer from "../organisms/Footer";
 
 export const POPULAR_MOVIES = gql`
   query Popularmovies($page: Int) {
@@ -291,6 +292,7 @@ const PopularMovies = () => {
           )}
         </>
       )}
+      <Footer/>
     </>
   );
 };

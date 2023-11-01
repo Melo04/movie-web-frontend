@@ -1,6 +1,5 @@
 import React from "react";
-import { LoadingSpinner } from "@apollo/space-kit/Loaders/LoadingSpinner";
-import { Spinner } from "@chakra-ui/react";
+import { Center, Spinner } from "@chakra-ui/react";
 
 const QueryResult = ({ loading, error, data, children }) => {
   if (error) {
@@ -8,16 +7,28 @@ const QueryResult = ({ loading, error, data, children }) => {
   }
   if (loading) {
     return (
-      <Spinner>
-        <LoadingSpinner data-testid="spinner" size="large" theme="grayscale" />
-      </Spinner>
+      <Center>
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Center>
     );
   }
   if (!data) {
     return (
-      <Spinner>
-        <LoadingSpinner data-testid="spinner" size="large" theme="grayscale" />
-      </Spinner>
+      <Center>
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Center>
     );
   }
   if (data) {
