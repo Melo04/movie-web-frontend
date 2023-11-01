@@ -96,33 +96,31 @@ const Movies = () => {
 
   const getFilteredMovies = () => {
     if (selectedGenres.length === 0) {
-      console.log(searchData?.searchMovies);
       return searchKeyword === ""
         ? movieData?.movies
         : searchData?.searchMovies;
-    }
-    if (
+    } else if (
       searchData?.searchMovies === undefined ||
       searchData?.searchMovies.length === 0 ||
       error
     ) {
-      console.log("not found");
       return (
         <Center>
           <Lottie animationData={notfoundData} />
         </Center>
       );
+    } else {
+      const selectedGenresIds = selectedGenres.map((genre) => parseInt(genre.id));
+      return searchKeyword === ""
+        ? movieData?.movies?.filter((movie) => {
+            const movieGenreIds = movie.genre_ids.map((id) => id);
+            return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+          })
+        : searchData?.searchMovies?.filter((movie) => {
+            const movieGenreIds = movie.genre_ids.map((id) => id);
+            return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+          });
     }
-    const selectedGenresIds = selectedGenres.map((genre) => parseInt(genre.id));
-    return searchKeyword === ""
-      ? movieData?.movies?.filter((movie) => {
-          const movieGenreIds = movie.genre_ids.map((id) => id);
-          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
-        })
-      : searchData?.searchMovies?.filter((movie) => {
-          const movieGenreIds = movie.genre_ids.map((id) => id);
-          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
-        });
   };
 
   const prevPage = () => {

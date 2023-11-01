@@ -39,7 +39,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8274/auth/signup",
+        `${process.env.REACT_APP_PORT}auth/signup`,
         formData
       );
       console.log(response);

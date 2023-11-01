@@ -51,7 +51,7 @@ const getProfile = async () => {
   }
 
   try {
-    const response = await axios.get("http://localhost:8274/users/profile", {
+    const response = await axios.get(`${process.env.REACT_APP_PORT}users/profile`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -89,7 +89,7 @@ const Profile = () => {
 
     e.preventDefault();
     try {
-      await axios.patch("http://localhost:8274/users", formData, {
+      await axios.patch(`${process.env.REACT_APP_PORT}users`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
