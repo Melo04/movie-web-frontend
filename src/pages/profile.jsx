@@ -42,7 +42,6 @@ export const GET_FAVOURITES = gql`
 
 const getProfile = async () => {
   const token = localStorage.getItem("token");
-  console.log("token from profile page => ", token)
   if (!token) {
     return (
       <Center>
@@ -57,7 +56,6 @@ const getProfile = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.log(error);

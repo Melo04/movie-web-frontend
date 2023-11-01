@@ -110,9 +110,6 @@ const Tvseries = () => {
 
   const { data: genreData } = useQuery(GENRES);
   const [selectedGenres, setSelectedGenres] = useState([]);
-  console.log(
-    searchKeyword === "" ? tvData?.tvseries : searchData?.searchTvseries
-  );
 
   const getFilteredSeries = () => {
     if (selectedGenres.length === 0) {

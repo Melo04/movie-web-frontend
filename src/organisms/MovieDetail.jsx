@@ -67,7 +67,6 @@ const MovieDetail = ({ movie, reviews }) => {
   const handleStarClick = (rating) => {
     setUserRating(rating);
   };
-  console.log(reviews);
 
   const posterUrl = `https://image.tmdb.org/t/p/original/${poster_path}`;
 
@@ -82,7 +81,6 @@ const MovieDetail = ({ movie, reviews }) => {
           rating: userRating,
         },
       });
-      console.log("rating added");
 
       setOverallRating(response.data.addMovieRatings.rating);
       localStorage.setItem(
@@ -96,7 +94,6 @@ const MovieDetail = ({ movie, reviews }) => {
 
   const handleSubmitFavourite = async () => {
     const token = localStorage.getItem("token");
-    console.log("token from favourites added => ", token);
 
     if (token) {
       try {
@@ -105,7 +102,6 @@ const MovieDetail = ({ movie, reviews }) => {
             addToFavouritesId: movie.id,
           },
         });
-        console.log("favourite added");
 
         toast.success("Favourite added successfully!", {
           position: toast.POSITION.TOP_RIGHT,

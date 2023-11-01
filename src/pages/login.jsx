@@ -38,9 +38,7 @@ const Login = () => {
         `${process.env.REACT_APP_PORT}auth/signin`,
         formData
       );
-      console.log(response);
       localStorage.setItem("token", response.data.access_token);
-      console.log("token from login page => ", localStorage.getItem("token"))
 
       setFormData({
         email: "",

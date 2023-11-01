@@ -66,8 +66,6 @@ const SeriesDetail = ({ series }) => {
           rating: userRating,
         },
       });
-      console.log("response => ", response);
-      console.log("rating added");
 
       setOverallRating(response.data.addTvRatings.rating);
       localStorage.setItem(

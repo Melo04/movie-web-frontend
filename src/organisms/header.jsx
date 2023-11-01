@@ -38,7 +38,6 @@ export default function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
   const token = localStorage.getItem("token");
-  console.log("token from header => ", token);
 
   return (
     <>
