@@ -1,11 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, gql } from "@apollo/client";
 import MovieCard from "../containers/movie-card";
-import { Grid, Heading, Center, HStack, IconButton, Button } from "@chakra-ui/react";
+import {
+  Grid,
+  Heading,
+  Center,
+  HStack,
+  IconButton,
+  InputGroup,
+  Input,
+  Button,
+  InputRightElement,
+  VStack,
+  Text,
+  MenuButton,
+  Menu,
+  MenuList,
+  Checkbox,
+} from "@chakra-ui/react";
 import QueryResult from "../organisms/query-result";
 import Lottie from "lottie-react";
 import loadingData from "../assets/loading.json";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import notfoundData from "../assets/notfound.json";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  SearchIcon,
+  ChevronDownIcon,
+} from "@chakra-ui/icons";
 
 export const POPULAR_MOVIES = gql`
   query Popularmovies($page: Int) {
@@ -18,6 +40,37 @@ export const POPULAR_MOVIES = gql`
       title
       vote_average
       vote_count
+      genre_ids
+    }
+  }
+`;
+
+export const GENRES = gql`
+  query Moviegenres {
+    moviegenres {
+      id
+      name
+    }
+  }
+`;
+
+export const SEARCHMOVIES = gql`
+  query SearchMovies($keyword: String!) {
+    searchMovies(keyword: $keyword) {
+      genre_ids
+      genres {
+        id
+      }
+      id
+      overview
+      popularity
+      poster_path
+      production_companies {
+        id
+      }
+      release_date
+      title
+      vote_average
     }
   }
 `;
@@ -28,11 +81,37 @@ const PopularMovies = () => {
   const {
     loading: queryLoading,
     error,
-    data,
+    data: movieData,
     fetchMore,
   } = useQuery(POPULAR_MOVIES, {
     variables: { page: currentPage },
   });
+
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const { loading: searchLoading, data: searchData } = useQuery(SEARCHMOVIES, {
+    variables: { keyword: searchKeyword },
+  });
+
+  const { data: genreData } = useQuery(GENRES);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+
+  const getFilteredMovies = () => {
+    if (selectedGenres.length === 0) {
+      return searchKeyword === ""
+        ? movieData?.popularmovies
+        : searchData?.searchMovies;
+    }
+    const selectedGenresIds = selectedGenres.map((genre) => parseInt(genre.id));
+    return searchKeyword === ""
+      ? movieData?.popularmovies?.filter((movie) => {
+          const movieGenreIds = movie.genre_ids.map((id) => id);
+          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+        })
+      : searchData?.searchMovies?.filter((movie) => {
+          const movieGenreIds = movie.genre_ids.map((id) => id);
+          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+        });
+  };
 
   const prevPage = () => {
     if (!queryLoading && currentPage > 1) {
@@ -77,7 +156,7 @@ const PopularMovies = () => {
   };
 
   useEffect(() => {
-    if (!queryLoading) {
+    if (!queryLoading || !searchLoading) {
       setTimeout(() => {
         setLoading(false);
       }, 2000);
@@ -85,7 +164,7 @@ const PopularMovies = () => {
     fetchMore({
       variables: { page: currentPage },
     });
-  }, [currentPage, queryLoading, fetchMore]);
+  }, [currentPage, queryLoading, fetchMore, searchLoading]);
 
   return (
     <>
@@ -98,54 +177,118 @@ const PopularMovies = () => {
         </Center>
       ) : (
         <>
-          <Grid
-            templateColumns={[
-              "repeat(1, 1fr)",
-              "repeat(2, 1fr)",
-              "repeat(3, 1fr)",
-              "repeat(4, 1fr)",
-            ]}
-            gap={10}
-            m={[5, 10, 10, 20]}
-          >
-            <QueryResult error={error} loading={loading} data={data}>
-              {data?.popularmovies?.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
-              ))}
-            </QueryResult>
-          </Grid>
+          <Center>
+            <VStack>
+              <InputGroup w="400px" borderColor="blue.300" mt={10}>
+                <Input
+                  color="blue.300"
+                  placeholder="Search for a movie..."
+                  _placeholder={{ color: "inherit" }}
+                  onChange={(e) => {
+                    setSearchKeyword(e.target.value);
+                  }}
+                />
+                <InputRightElement>
+                  <SearchIcon color="blue.300" />
+                </InputRightElement>
+              </InputGroup>
+              <HStack spacing={5} mt={5}>
+                <Text fontSize="lg">Filter By</Text>
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    rightIcon={<ChevronDownIcon />}
+                    colorScheme="blue"
+                  >
+                    Genres
+                  </MenuButton>
+                  <MenuList py={5} px={5}>
+                    {genreData?.moviegenres?.map((genre) => (
+                      <VStack key={genre.id} align="left" spacing={1}>
+                        <Checkbox
+                          colorScheme="blue"
+                          value={genre.id}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedGenres((prev) => [
+                                ...prev,
+                                {
+                                  id: genre.id,
+                                },
+                              ]);
+                            } else {
+                              setSelectedGenres((prev) =>
+                                prev.filter((g) => g.id !== genre.id)
+                              );
+                            }
+                          }}
+                        >
+                          {genre.name}
+                        </Checkbox>
+                      </VStack>
+                    ))}
+                  </MenuList>
+                </Menu>
+              </HStack>
+            </VStack>
+          </Center>
+          {getFilteredMovies()?.length === 0 ? (
+            <VStack my={20}>
+              <Heading color="blue.500">Movie Not Found</Heading>
+              <Lottie animationData={notfoundData} />
+            </VStack>
+          ) : (
+            <Grid
+              templateColumns={[
+                "repeat(1, 1fr)",
+                "repeat(2, 1fr)",
+                "repeat(3, 1fr)",
+                "repeat(4, 1fr)",
+              ]}
+              gap={10}
+              m={[5, 10, 10, 20]}
+            >
+              <QueryResult error={error} loading={loading} data={movieData}>
+                {getFilteredMovies()?.map((movie) => (
+                  <MovieCard key={movie.id} movie={movie} />
+                ))}
+              </QueryResult>
+            </Grid>
+          )}
 
-          <HStack spacing={5} mt={10} mb={10} justify="center">
-            <IconButton
-              aria-label="previous"
-              icon={<ChevronLeftIcon />}
-              borderRadius="50%"
-              variant="outline"
-              onClick={prevPage}
-            />
-            {getPageButtons().map((page, i) => (
-              <Center key={i}>
-                <Button
-                  colorScheme="teal"
-                  px={3}
-                  py={4}
-                  borderRadius="50%"
-                  variant="solid"
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                >
-                  {page === "..." ? "..." : <span>{page}</span>}
-                </Button>
-              </Center>
-            ))}
-            <IconButton
-              aria-label="next"
-              icon={<ChevronRightIcon />}
-              borderRadius="50%"
-              variant="outline"
-              onClick={nextPage}
-            />
-          </HStack>
+          {getFilteredMovies() && getFilteredMovies().length >= 20 && (
+            <HStack spacing={5} mt={10} mb={10} justify="center">
+              <IconButton
+                aria-label="previous"
+                icon={<ChevronLeftIcon />}
+                borderRadius="50%"
+                variant="outline"
+                onClick={prevPage}
+              />
+              {getPageButtons().map((page, i) => (
+                <Center key={i}>
+                  <Button
+                    colorScheme="teal"
+                    px={3}
+                    py={4}
+                    borderRadius="50%"
+                    variant="solid"
+                    onClick={() => setCurrentPage(page)}
+                    isActive={currentPage === page}
+                  >
+                    {page === "..." ? "..." : <span>{page}</span>}
+                  </Button>
+                </Center>
+              ))}
+              <IconButton
+                aria-label="next"
+                icon={<ChevronRightIcon />}
+                borderRadius="50%"
+                variant="outline"
+                onClick={nextPage}
+              />
+            </HStack>
+          )}
         </>
       )}
     </>

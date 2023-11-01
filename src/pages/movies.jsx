@@ -99,28 +99,19 @@ const Movies = () => {
       return searchKeyword === ""
         ? movieData?.movies
         : searchData?.searchMovies;
-    } else if (
-      searchData?.searchMovies === undefined ||
-      searchData?.searchMovies.length === 0 ||
-      error
-    ) {
-      return (
-        <Center>
-          <Lottie animationData={notfoundData} />
-        </Center>
-      );
-    } else {
-      const selectedGenresIds = selectedGenres.map((genre) => parseInt(genre.id));
-      return searchKeyword === ""
-        ? movieData?.movies?.filter((movie) => {
-            const movieGenreIds = movie.genre_ids.map((id) => id);
-            return movieGenreIds.some((id) => selectedGenresIds.includes(id));
-          })
-        : searchData?.searchMovies?.filter((movie) => {
-            const movieGenreIds = movie.genre_ids.map((id) => id);
-            return movieGenreIds.some((id) => selectedGenresIds.includes(id));
-          });
     }
+    const selectedGenresIds = selectedGenres.map((genre) =>
+      parseInt(genre.id)
+    );
+    return searchKeyword === ""
+      ? movieData?.movies?.filter((movie) => {
+          const movieGenreIds = movie.genre_ids.map((id) => id);
+          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+        })
+      : searchData?.searchMovies?.filter((movie) => {
+          const movieGenreIds = movie.genre_ids.map((id) => id);
+          return movieGenreIds.some((id) => selectedGenresIds.includes(id));
+        });
   };
 
   const prevPage = () => {
@@ -265,6 +256,7 @@ const Movies = () => {
               </QueryResult>
             </Grid>
           )}
+          {getFilteredMovies() && getFilteredMovies().length >= 20 && (
           <HStack spacing={5} mt={10} mb={10} justify="center">
             <IconButton
               aria-label="previous"
@@ -296,6 +288,7 @@ const Movies = () => {
               onClick={nextPage}
             />
           </HStack>
+          )}
         </>
       )}
     </>
